@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vườn ươm hạnh phúc</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;1,400&family=EB+Garamond:ital,wght@0,600;1,500&family=Dancing+Script:wght@600&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <style>
+        :root { --cyber-cyan: #00f2ff; --gold-text: #f1c40f; --bg-dark: #000; --nature-green: #7cfc00; }
+        body { background: var(--bg-dark); color: #e0e0e0; font-family: 'Roboto', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
+
+        /* Navigation */
+        .nav-tabs { background: #000; border: none; padding: 5px 10px 0; border-bottom: 2px solid #1a1a1a; position: sticky; top: 0; z-index: 1000; }
+        .nav-link { color: #666; border: none !important; font-weight: bold; text-transform: uppercase; font-size: 0.8rem; padding: 12px 20px; font-family: 'Orbitron', sans-serif; }
+        .nav-link.active { background: var(--cyber-cyan) !important; color: #000 !important; box-shadow: 0 -5px 20px rgba(0, 242, 255, 0.4); }
+
+        /* Workspace & Responsive Mobile */
+        .main-wrapper { display: flex; flex-direction: row; height: calc(100vh - 55px); }
+        @media (max-width: 992px) {
+            .main-wrapper { flex-direction: column; height: auto; }
+            .sidebar { width: 100% !important; border-right: none !important; border-bottom: 1px solid #222; }
+            .preview-area { min-height: 400px; }
+        }
+
+        .sidebar { width: 340px; background: #111; padding: 20px; overflow-y: auto; border-right: 1px solid #222; flex-shrink: 0; }
+        .preview-area { flex-grow: 1; background: #000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        #previewImg { max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 0 0 50px rgba(0,0,0,0.9); border-radius: 8px; border: 1px solid #333; }
+
+        .group-label { color: var(--cyber-cyan); font-weight: bold; text-transform: uppercase; font-size: 0.75rem; margin-top: 15px; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px; letter-spacing: 1px; }
+        .form-control { background: #1a1a1a; border: 1px solid #333; color: white; font-size: 0.85rem; margin-bottom: 10px; }
+        label { font-size: 0.7rem; color: #888; display: block; margin-bottom: 3px; }
+        input[type=range] { width: 100%; accent-color: var(--cyber-cyan); margin-bottom: 12px; }
+
+        .btn-action { font-weight: bold; padding: 12px; border-radius: 4px; border: none; width: 100%; margin-top: 10px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
+        .btn-garden { background: linear-gradient(45deg, #0066ff, var(--cyber-cyan)); color: #fff; }
+        .btn-save { background: #222; color: #888; }
+
+        /* VƯỜN ƯƠM MẦM */
+        .garden-container { padding: 40px; min-height: 100%; }
+        .garden-header-box { border: 1px solid rgba(0, 242, 255, 0.3); border-radius: 15px; padding: 30px; margin-bottom: 30px; background: rgba(0, 242, 255, 0.03); box-shadow: 0 0 20px rgba(0, 242, 255, 0.1); }
+        .garden-stats h2 { font-family: 'Orbitron', sans-serif; color: var(--cyber-cyan); text-shadow: 0 0 15px var(--cyber-cyan); letter-spacing: 2px; }
+        .garden-divider { height: 2px; background: linear-gradient(90deg, transparent, var(--cyber-cyan), transparent); margin: 20px auto 40px; width: 80%; box-shadow: 0 0 15px var(--cyber-cyan); }
+        .garden-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 40px 20px; justify-items: center; }
+        
+        .tech-node { width: 160px; position: relative; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.3s; padding-top: 20px; }
+        .tech-node::before { content: ''; position: absolute; top: 30px; width: 100px; height: 100px; background: radial-gradient(circle, rgba(0, 242, 255, 0.4) 0%, rgba(0, 242, 255, 0) 70%); border-radius: 50%; z-index: 0; filter: blur(15px); opacity: 0; transition: 0.8s; }
+        .tech-node:hover::before { opacity: 1; transform: scale(1.4); }
+        .mam-xanh-img { width: 90px; height: 90px; object-fit: contain; position: relative; z-index: 1; transition: 0.5s; }
+        
+        @keyframes slowGrowth { 0% { transform: scale(0) translateY(50px); opacity: 0; filter: brightness(0.5) blur(5px); } 40% { transform: scale(0.3, 1.2) translateY(-10px); opacity: 1; filter: brightness(0.8) blur(2px); } 70% { transform: scale(1.1, 0.9) translateY(5px); filter: brightness(1) blur(0); } 100% { transform: scale(1) translateY(0); opacity: 1; } }
+        @keyframes neonPulse { 0%, 100% { filter: drop-shadow(0 0 15px rgba(0, 242, 255, 0.5)); transform: scale(1); } 50% { filter: drop-shadow(0 0 35px rgba(0, 242, 255, 0.9)); transform: scale(1.03); } }
+        .growing-anim { animation: slowGrowth 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards; transform-origin: bottom center; }
+        .tech-node:not(.placeholder-node) .mam-xanh-img { animation: neonPulse 4s infinite ease-in-out 2.5s; }
+        
+        .node-name { margin-top: 15px; font-weight: 700; color: #fff; text-align: center; font-size: 0.85rem; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; position: relative; z-index: 2; }
+        .node-role { font-size: 0.7rem; color: var(--gold-text); font-style: italic; position: relative; z-index: 2; }
+        
+        /* Modal & Download Button */
+        #loading { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        #modalImg { max-width: 95%; max-height: 90vh; object-fit: contain; border: 1px solid var(--cyber-cyan); box-shadow: 0 0 50px rgba(0, 242, 255, 0.3); }
+        
+        .modal-download-btn {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            width: 60px;
+            height: 60px;
+            background: var(--cyber-cyan);
+            color: #000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            text-decoration: none;
+            box-shadow: 0 0 20px var(--cyber-cyan);
+            transition: 0.3s;
+            z-index: 2000;
+        }
+        .modal-download-btn:hover { transform: scale(1.1); color: #000; filter: brightness(1.2); }
+        
+        @media (max-width: 576px) {
+            .modal-download-btn { width: 50px; height: 50px; font-size: 1.4rem; bottom: 20px; right: 20px; }
+            .garden-container { padding: 15px; }
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;" onkeydown="return disableF12(event);">
+
+<div id="loading">
+    <div class="spinner-border text-info" style="width: 4rem; height: 4rem;"></div>
+    <div class="mt-4 text-info fw-bold" style="font-family: 'Orbitron';">ĐANG GIEO THÔNG ĐIỆP...</div>
+</div>
+
+<ul class="nav nav-tabs" id="myTab">
+    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#edit-pane">Tạo Thông Điệp</button></li>
+    <li class="nav-item"><button class="nav-link" id="garden-tab-btn" data-bs-toggle="tab" data-bs-target="#garden-pane">Vườn Thông Điệp</button></li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade show active" id="edit-pane">
+        <div class="main-wrapper">
+            <div class="sidebar">
+                <div class="group-label">0. Ảnh Chân Dung</div>
+                <input class="form-control mb-2" type="file" id="uploadAvatar" accept="image/*">
+                <label>Trái / Phải:</label><input type="range" id="avtX" min="-300" max="300" value="0">
+                <label>Lên / Xuống:</label><input type="range" id="avtY" min="-300" max="300" value="0">
+                <label>Kích thước:</label><input type="range" id="avtScale" min="0.1" max="2.0" step="0.01" value="0.55">
+
+                <div class="group-label">1. Người Gửi & Địa phương</div>
+                <input type="text" id="inpSender" class="form-control" placeholder="Họ tên người gửi">
+                <input type="text" id="inpSenderRole" class="form-control" placeholder="Xưng hô / Chức vụ">
+                <input type="text" id="inpProvince" class="form-control" placeholder="Địa phương (Tỉnh/Thành phố)">
+
+                <div class="group-label">2. Người Nhận</div>
+                <input type="text" id="inpReceiver" class="form-control" placeholder="Họ tên người nhận">
+                
+                <div class="group-label">3. Nội dung thông điệp</div>
+                <textarea id="inpMessage" class="form-control" rows="4" placeholder="Nhập lời yêu thương..."></textarea>
+                
+                <div class="group-label">4. Hiệu chỉnh thẩm mỹ</div>
+                <label>Vị trí dọc lời nhắn:</label><input type="range" id="msgY" min="-300" max="300" value="0">
+                <label>Vị trí ngang lời nhắn:</label><input type="range" id="msgXOffset" min="-500" max="500" value="0">
+                <label>Độ rộng lời nhắn:</label><input type="range" id="msgWidth" min="300" max="1000" value="730">
+                <label>Cỡ chữ lời nhắn:</label><input type="range" id="msgSize" min="20" max="80" value="34">
+                <label>Cỡ chữ thông tin:</label><input type="range" id="infoSize" min="20" max="60" value="28">
+                
+                <button onclick="addToGarden()" class="btn-action btn-garden">Gieo thông điệp</button>
+                <button onclick="downloadImage()" class="btn-action btn-save">Lưu về máy</button>
+            </div>
+            <div class="preview-area"><img id="previewImg" src=""></div>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="garden-pane">
+        <div class="garden-container text-center">
+            <div class="garden-header-box">
+                <div class="garden-stats">
+                    <h2>VƯỜN ƯƠM MẦM HẠNH PHÚC</h2>
+                    <div style="font-family: 'Orbitron'; color: #555; font-size: 0.7rem; margin-top: 5px;">HÀNH TRÌNH VIỆT NAM</div>
+                    <div class="mt-3">
+                        <span style="color: #888;">Hiện có </span>
+                        <b id="treeCount" style="font-size: 3rem; color: #fff; text-shadow: 0 0 15px var(--cyber-cyan);">0</b> 
+                        <span style="color: var(--cyber-cyan);"> mầm xanh</span>
+                    </div>
+                </div>
+            </div>
+            <div class="garden-divider"></div>
+            <div class="garden-grid" id="gardenGrid"></div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CÓ NÚT TẢI VỀ -->
+<div class="modal fade" id="treeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content bg-black">
+            <div class="modal-body p-0 d-flex align-items-center justify-content-center position-relative">
+                <img id="modalImg" src="" data-bs-dismiss="modal" style="cursor: pointer;">
+                <!-- NÚT TẢI VỀ TRONG MODAL -->
+                <a href="javascript:void(0)" id="modalDownloadBtn" class="modal-download-btn" title="Tải ảnh này">
+                    <i class="bi bi-download"></i>
+                </a>
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<canvas id="mainCanvas" style="display:none;"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxdwj6-9ZXXIKfdMrnl2Zq-nuQryIDE7lTCy8Tm_0_tUgeGqKsa9ut-Dp-cDgSwY1-sdQ/exec"; 
+    const BG_URL = "https://lh3.googleusercontent.com/d/1fn6VFTs0Mb1fDQLNzjiwKRPLLXeiuBMS";
+    const LOGO_CAY = "https://lh3.googleusercontent.com/d/12K8BTkKCDnh9RxYcYyx7zmfZePJJVx2s";
+
+    const canvas = document.getElementById('mainCanvas');
+    const ctx = canvas.getContext('2d');
+    const previewImg = document.getElementById('previewImg');
+    let bgImg = new Image();
+    let userAvatar = new Image();
+    let isAvatarLoaded = false;
+    let gardenData = []; 
+    let renderedSet = new Set();
+    let lastTotal = 0;
+
+    window.onload = () => {
+        bgImg.crossOrigin = "anonymous";
+        bgImg.src = BG_URL;
+        bgImg.onload = () => { canvas.width = bgImg.width; canvas.height = bgImg.height; update(); };
+        initLoadData();
+        setInterval(autoSyncData, 8000); 
+    };
+
+    document.getElementById('uploadAvatar').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            userAvatar = new Image();
+            userAvatar.onload = () => { isAvatarLoaded = true; update(); };
+            userAvatar.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+
+    function update() {
+        if(!bgImg.complete) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (isAvatarLoaded) {
+            ctx.save();
+            const avtX = parseInt(document.getElementById('avtX').value);
+            const avtY = parseInt(document.getElementById('avtY').value);
+            const scale = parseFloat(document.getElementById('avtScale').value);
+            const baseX = 245; 
+            const baseY = 460;
+            const w = userAvatar.width * scale;
+            const h = userAvatar.height * scale;
+            ctx.drawImage(userAvatar, baseX + avtX - w/2, baseY + avtY - h/2, w, h);
+            ctx.restore();
+        }
+
+        ctx.drawImage(bgImg, 0, 0);
+        drawProjectContent();
+        previewImg.src = canvas.toDataURL('image/jpeg', 0.85);
+    }
+
+    function drawProjectContent() {
+        const sender = (document.getElementById('inpSender').value || "Người gửi").toUpperCase();
+        const sRole = document.getElementById('inpSenderRole').value || "";
+        const receiver = document.getElementById('inpReceiver').value || "Người nhận";
+        const province = document.getElementById('inpProvince').value || "Ninh Bình";
+        const message = document.getElementById('inpMessage').value || "Nhập lời yêu thương...";
+        
+        const infoSize = parseInt(document.getElementById('infoSize').value);
+        const msgSize = parseInt(document.getElementById('msgSize').value);
+        const msgYAdjust = parseInt(document.getElementById('msgY').value);
+        const msgXOffset = parseInt(document.getElementById('msgXOffset').value); 
+        const msgWidth = parseInt(document.getElementById('msgWidth').value);
+
+        const mainColor = "#05321e"; 
+
+        ctx.textAlign = "center"; 
+        ctx.fillStyle = mainColor;
+        ctx.font = `bold ${infoSize * 0.8}px 'Montserrat'`;
+        ctx.fillText(sender, 267, 619); 
+        
+        ctx.fillStyle = "#666";
+        ctx.font = `italic 400 ${infoSize * 0.8}px 'Montserrat'`; 
+        ctx.fillText(sRole, 260, 680); 
+        ctx.fillText(province, 264, 717); 
+
+        ctx.textAlign = "left";
+        ctx.fillStyle = mainColor;
+        ctx.font = `${infoSize * 1.5}px 'Dancing Script'`;
+        ctx.fillText(receiver, 651, 459); 
+
+        const msgX = 535 + msgXOffset; 
+        const msgY = 519 + msgYAdjust; 
+        ctx.fillStyle = "#333"; 
+        ctx.font = `${msgSize}px 'Dancing Script'`;
+        
+        justifyText(ctx, message, msgX, msgY, msgWidth, msgSize * 1.4);
+    }
+
+    function justifyText(context, text, x, y, maxWidth, lineHeight) {
+        const indent = 50; 
+        let words = text.split(' ');
+        let lines = [];
+        let currentLine = [];
+        
+        for (let n = 0; n < words.length; n++) {
+            let testLine = [...currentLine, words[n]].join(' ');
+            let testWidth = context.measureText(testLine).width + (lines.length === 0 ? indent : 0);
+            if (testWidth > maxWidth && currentLine.length > 0) {
+                lines.push(currentLine);
+                currentLine = [words[n]];
+            } else {
+                currentLine.push(words[n]);
+            }
+        }
+        lines.push(currentLine);
+
+        lines.forEach((lineWords, index) => {
+            let isFirstLine = (index === 0);
+            let isLastLine = (index === lines.length - 1);
+            let lineY = y + (index * lineHeight);
+            let startX = x + (isFirstLine ? indent : 0);
+
+            if (isLastLine || lineWords.length === 1) {
+                context.fillText(lineWords.join(' '), startX, lineY);
+            } else {
+                let totalWordsWidth = 0;
+                lineWords.forEach(w => totalWordsWidth += context.measureText(w).width);
+                let currentMaxWidth = isFirstLine ? maxWidth - indent : maxWidth;
+                let wordSpacing = (currentMaxWidth - totalWordsWidth) / (lineWords.length - 1);
+                let cursorX = startX;
+                lineWords.forEach(word => {
+                    context.fillText(word, cursorX, lineY);
+                    cursorX += context.measureText(word).width + wordSpacing;
+                });
+            }
+        });
+    }
+
+    async function initLoadData() {
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL);
+            const data = await res.json();
+            gardenData = data.items.slice().reverse();
+            lastTotal = data.total;
+            document.getElementById('treeCount').innerText = lastTotal;
+            renderGarden();
+        } catch (e) { console.error("Lỗi tải dữ liệu", e); }
+    }
+
+    function renderGarden() {
+        const grid = document.getElementById('gardenGrid');
+        if(!grid) return;
+        grid.innerHTML = "";
+        gardenData.forEach((item, index) => {
+            const div = document.createElement('div');
+            let isFirstRender = !renderedSet.has(item.imgData);
+            if(isFirstRender) renderedSet.add(item.imgData);
+            div.className = isFirstRender ? "tech-node growing-anim" : "tech-node";
+            div.style.animationDelay = `${index * 0.1}s`;
+            div.innerHTML = `<img src="${LOGO_CAY}" class="mam-xanh-img"><div class="node-name">${item.hoten}</div><div class="node-role">Từ: ${item.donvi || 'Ẩn danh'}</div>`;
+            
+            // SỰ KIỆN CLICK MỞ MODAL & GÁN LINK TẢI
+            div.onclick = () => { 
+                const modalImg = document.getElementById('modalImg');
+                const dlBtn = document.getElementById('modalDownloadBtn');
+                modalImg.src = item.imgData;
+                
+                // Gán chức năng cho nút tải trong modal
+                dlBtn.onclick = (e) => {
+                    e.stopPropagation(); // Không cho modal tự đóng khi bấm tải
+                    const link = document.createElement('a');
+                    link.download = `VuoHanhPhuc_${item.hoten}_${Date.now()}.jpg`;
+                    link.href = item.imgData;
+                    link.click();
+                };
+                
+                new bootstrap.Modal(document.getElementById('treeModal')).show(); 
+            };
+            grid.appendChild(div);
+        });
+    }
+
+    async function addToGarden() {
+        const sender = document.getElementById('inpSender').value;
+        const receiver = document.getElementById('inpReceiver').value;
+        if(!sender || !receiver) return alert("Vui lòng nhập đầy đủ tên!");
+        if(!isAvatarLoaded) return alert("Vui lòng tải ảnh chân dung lên!");
+        
+        document.getElementById('loading').style.display = 'flex';
+        const imgData = canvas.toDataURL('image/jpeg', 0.85);
+        const newItem = { hoten: receiver, donvi: sender, imgData: imgData };
+        
+        fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(newItem) });
+        gardenData.unshift(newItem); 
+        renderGarden();
+        setTimeout(() => { document.getElementById('loading').style.display = 'none'; document.getElementById('garden-tab-btn').click(); }, 1500);
+    }
+
+    async function autoSyncData() {
+        try {
+            const res = await fetch(GOOGLE_SCRIPT_URL);
+            const data = await res.json();
+            if (parseInt(data.total) !== lastTotal) {
+                lastTotal = data.total;
+                document.getElementById('treeCount').innerText = lastTotal;
+                gardenData = data.items.slice().reverse();
+                renderGarden();
+            }
+        } catch (e) {}
+    }
+
+    function downloadImage() {
+        const link = document.createElement('a');
+        link.download = `ThongDiep_${Date.now()}.jpg`;
+        link.href = canvas.toDataURL('image/jpeg', 0.95);
+        link.click();
+    }
+
+    function disableF12(e) { if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73)) return false; }
+    document.addEventListener('contextmenu', event => event.preventDefault());
+    document.querySelectorAll('input, textarea').forEach(el => el.oninput = update);
+</script>
+</body>
+</html>
